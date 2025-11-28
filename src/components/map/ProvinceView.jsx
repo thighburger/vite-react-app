@@ -9,24 +9,9 @@ const ProvinceView = ({ province, onBack, onSelectCity }) => {
     const cities = cityData[province.id] || cityData.default;
 
     return (
-        <div className="container fade-in" style={{ paddingTop: '2rem' }}>
-            <button
-                onClick={onBack}
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    color: 'var(--text-secondary)',
-                    background: 'transparent',
-                    marginBottom: '2rem',
-                    fontSize: '1rem'
-                }}
-            >
-                <ArrowLeft size={20} />
-                지도 돌아가기
-            </button>
+        <div className="container fade-in" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
 
-            <header style={{ marginBottom: '3rem' }}>
+            <header style={{ marginBottom: '3rem', marginTop: '4rem' }}>
                 <h2 style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{province.name}</h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>어느 도시로 떠나볼까요?</p>
             </header>

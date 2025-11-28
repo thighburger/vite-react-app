@@ -243,7 +243,7 @@ function App() {
   const location = useLocation();
   const [isLoading, setIsLoading] = React.useState(true);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  const [theme, setTheme] = React.useState('dark');
+  const [theme, setTheme] = React.useState('light');
 
   React.useEffect(() => {
     // Check for existing session

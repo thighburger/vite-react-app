@@ -131,7 +131,7 @@ export const createChatBot = async (botData) => {
  */
 export const sendChatMessage = async (chatBotId, message) => {
     try {
-        const response = await axios.post(`http://133.186.229.94:8080/chatBots/${chatBotId}`, { text: message });
+        const response = await axios.post(`http://133.186.229.94:8080/chatBots/1`, { text: message });
         return response.data;
     } catch (error) {
         console.error('Chat message failed:', error);
@@ -147,7 +147,7 @@ export const sendChatMessage = async (chatBotId, message) => {
  */
 export const getChatHistory = async (chatBotId) => {
     try {
-        const response = await axios.get(`http://133.186.229.94:8080/chatBots/${chatBotId}`);
+        const response = await axios.get(`http://133.186.229.94:8080/chatBots/1`);
         return response.data;
     } catch (error) {
         console.error('Failed to fetch chat history:', error);
@@ -203,5 +203,20 @@ export const checkChatBotExistence = async (cityId) => {
     } catch (error) {
         console.error('Failed to check chatbot existence:', error);
         return null;
+    }
+};
+
+/**
+ * Deletes a chatbot.
+ * 
+ * @param {string} chatBotId - The ID of the chatbot to delete.
+ * @returns {Promise<void>}
+ */
+export const deleteChatBot = async (chatBotId) => {
+    try {
+        await axios.delete(`http://133.186.229.94:8080/chatBots/1`);
+    } catch (error) {
+        console.error('Failed to delete chatbot:', error);
+        throw error;
     }
 };

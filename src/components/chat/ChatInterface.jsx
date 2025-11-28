@@ -190,26 +190,26 @@ const ChatInterface = ({ city, onBack, characterSettings }) => {
                                         flexDirection: msg.sender === 'user' ? 'row-reverse' : 'row'
                                     }}
                                 >
-                                    <div style={{
-                                        width: '36px',
-                                        height: '36px',
-                                        borderRadius: '50%',
-                                        background: msg.sender === 'user' ? 'var(--secondary)' : 'var(--accent)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                        overflow: 'hidden',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                                    }}>
-                                        {msg.sender === 'user' ? (
-                                            <User size={18} color="white" />
-                                        ) : mateImage ? (
-                                            <img src={mateImage} alt="Bot" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        ) : (
-                                            <Bot size={18} color="white" />
-                                        )}
-                                    </div>
+                                    {msg.sender !== 'user' && (
+                                        <div style={{
+                                            width: '36px',
+                                            height: '36px',
+                                            borderRadius: '50%',
+                                            background: 'var(--accent)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexShrink: 0,
+                                            overflow: 'hidden',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                        }}>
+                                            {mateImage ? (
+                                                <img src={mateImage} alt="Bot" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <Bot size={18} color="white" />
+                                            )}
+                                        </div>
+                                    )}
                                     <div style={{
                                         background: msg.sender === 'user' ? 'var(--gradient-primary)' : 'var(--surface)',
                                         padding: '0.6rem 1rem',

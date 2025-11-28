@@ -108,7 +108,6 @@ const CityDetail = ({ city, onBack, onStartSetup }) => {
                         gap: '1rem'
                     }}>
                         {city.name}
-                        <MapPin size={40} color="var(--accent)" />
                     </h1>
                     <p style={{
                         fontSize: '1.5rem',
