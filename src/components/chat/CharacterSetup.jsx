@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Settings, Sparkles, User, MessageSquare, ArrowLeft, Loader2 } from 'lucide-react';
-import { generateCharacterImage } from '../../services/api';
+import { generateCharacterImage, createChatBot } from '../../services/api';
 
 const CharacterSetup = ({ city, onStartChat, onBack }) => {
     const [name, setName] = useState('');
@@ -15,15 +15,27 @@ const CharacterSetup = ({ city, onStartChat, onBack }) => {
         e.preventDefault();
         setIsGenerating(true);
         try {
-            const imageUrl = await generateCharacterImage({ name, personality, appearance });
+            // Run both requests in parallel
+            const [imageUrl, botResponse] = await Promise.all([
+                generateCharacterImage({ name, personality, appearance }),
+                createChatBot({ name, personality, appearance })
+            ]);
+
+            console.log('Bot created:', botResponse);
             setGeneratedImage(imageUrl);
             setIsGenerated(true);
 
             // Save to localStorage
             localStorage.setItem('character_image', imageUrl);
-            localStorage.setItem('character_info', JSON.stringify({ name, personality, appearance }));
+            // Assuming botResponse has an id field. If not, we might need to adjust.
+            localStorage.setItem('character_info', JSON.stringify({
+                name,
+                personality,
+                appearance,
+                chatBotId: botResponse.id // Save the ID
+            }));
         } catch (error) {
-            console.error("Failed to generate character:", error);
+            console.error("Failed to generate character or create bot:", error);
             alert("메이트 생성에 실패했습니다. 다시 시도해주세요.");
         } finally {
             setIsGenerating(false);
@@ -31,7 +43,17 @@ const CharacterSetup = ({ city, onStartChat, onBack }) => {
     };
 
     const handleStartChatting = () => {
-        onStartChat({ name, personality, appearance, image: generatedImage });
+        // Retrieve bot info from local storage if available, or use state if just created
+        const storedInfo = localStorage.getItem('character_info');
+        const botId = storedInfo ? JSON.parse(storedInfo).chatBotId : null;
+
+        onStartChat({
+            name,
+            personality,
+            appearance,
+            image: generatedImage,
+            chatBotId: botId // Pass the ID
+        });
     };
 
     if (isGenerating) {

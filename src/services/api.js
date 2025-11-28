@@ -3,6 +3,20 @@ import axios from 'axios';
 // Mock delay to simulate network latency
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Add request interceptor to include access token
+axios.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 /**
  * Fetches a chat response from the backend.
  * 
@@ -45,10 +59,78 @@ export const fetchChatResponse = async (region, message) => {
  */
 export const generateCharacterImage = async (settings) => {
     try {
-        const response = await axios.post('http://localhost:8001/generate-image', settings);
+        const response = await axios.post('http://133.186.229.94:8001/generate-image', settings);
         return response.data.image;
     } catch (error) {
         console.error('Image generation failed:', error);
+        throw error;
+    }
+};
+
+/**
+ * Registers a new user.
+ * 
+ * @param {Object} userData - User registration data (username, password, passwordConfirm).
+ * @returns {Promise<Object>} - The response data.
+ */
+export const signup = async (userData) => {
+    try {
+        const response = await axios.post('http://133.186.229.94:8080/auth/signup', userData);
+        if (response.data && response.data.accessToken) {
+            localStorage.setItem('accessToken', response.data.accessToken);
+        }
+        return response.data;
+    } catch (error) {
+        console.error('Signup failed:', error);
+        throw error;
+    }
+};
+
+/**
+ * Creates a new chatbot.
+ * 
+ * @param {Object} botData - Chatbot data (name, personality, appearance).
+ * @returns {Promise<Object>} - The response data.
+ */
+export const createChatBot = async (botData) => {
+    try {
+        const response = await axios.post('http://133.186.229.94:8080/chatBots', botData);
+        return response.data;
+    } catch (error) {
+        console.error('ChatBot creation failed:', error);
+        throw error;
+    }
+};
+
+/**
+ * Sends a message to the chatbot.
+ * 
+ * @param {string} chatBotId - The ID of the chatbot.
+ * @param {string} message - The message to send.
+ * @returns {Promise<string>} - The chatbot's response text.
+ */
+export const sendChatMessage = async (chatBotId, message) => {
+    try {
+        const response = await axios.post(`http://133.186.229.94:8080/chatBots/${chatBotId}`, { text: message });
+        return response.data;
+    } catch (error) {
+        console.error('Chat message failed:', error);
+        throw error;
+    }
+};
+
+/**
+ * Fetches chat history for a specific chatbot.
+ * 
+ * @param {string} chatBotId - The ID of the chatbot.
+ * @returns {Promise<Array>} - The list of chat messages.
+ */
+export const getChatHistory = async (chatBotId) => {
+    try {
+        const response = await axios.get(`http://133.186.229.94:8080/chatBots/${chatBotId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch chat history:', error);
         throw error;
     }
 };

@@ -215,13 +215,23 @@ const ChatPage = () => {
     }
   }
 
+  // Try to recover settings from localStorage if not in state
+  const settings = state?.settings || (() => {
+    const storedInfo = localStorage.getItem('character_info');
+    const storedImage = localStorage.getItem('character_image');
+    if (storedInfo) {
+      return { ...JSON.parse(storedInfo), image: storedImage };
+    }
+    return null;
+  })();
+
   if (!city) return <Navigate to="/" />;
-  if (!state?.settings) return <Navigate to={`/setup/${cityId}`} />;
+  if (!settings) return <Navigate to={`/setup/${cityId}`} />;
 
   return (
     <ChatInterface
       city={city}
-      characterSettings={state.settings}
+      characterSettings={settings}
       onBack={() => navigate(`/map/${provinceId}`)}
     />
   );
@@ -238,6 +248,12 @@ function App() {
   const [theme, setTheme] = React.useState('dark');
 
   React.useEffect(() => {
+    // Check for existing session
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      setIsAuthenticated(true);
+    }
+
     // Simulate initial loading
     const timer = setTimeout(() => {
       setIsLoading(false);

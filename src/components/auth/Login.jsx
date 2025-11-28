@@ -1,21 +1,54 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Lock, Smile, ArrowRight, ArrowLeft } from 'lucide-react';
+import { User, Lock, Smile, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
+import { signup } from '../../services/api';
 
 const Login = ({ onLogin }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
+    const [passwordConfirm, setPasswordConfirm] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // In a real app, you would validate and call an API here.
-        // For now, we simulate a successful login/signup.
-        if (username && password) {
-            onLogin({ username, name: isLogin ? 'User' : name });
+
+        if (isLogin) {
+            // Login logic (mock for now as requested only signup changes)
+            if (username && password) {
+                onLogin({ username, name: username });
+            } else {
+                alert('아이디와 비밀번호를 입력해주세요.');
+            }
         } else {
-            alert('아이디와 비밀번호를 입력해주세요.');
+            // Signup logic
+            if (!username || !password || !passwordConfirm) {
+                alert('모든 필드를 입력해주세요.');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                alert('비밀번호가 일치하지 않습니다.');
+                return;
+            }
+
+            setIsLoading(true);
+            try {
+                const userData = {
+                    username,
+                    password,
+                    passwordConfirm
+                };
+                const response = await signup(userData);
+                console.log('Signup success:', response);
+                // Auto login after signup
+                onLogin({ username, name: username });
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -33,7 +66,6 @@ const Login = ({ onLogin }) => {
                 style={{
                     width: '100%',
                     maxWidth: '400px',
-                    // Card styling removed
                 }}
             >
                 {!isLogin && (
@@ -68,32 +100,12 @@ const Login = ({ onLogin }) => {
                 </div>
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    {!isLogin && (
-                        <div style={{ position: 'relative' }}>
-                            <Smile size={20} color="var(--text-secondary)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-                            <input
-                                type="text"
-                                placeholder="이름 (닉네임)"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    padding: '1rem 1rem 1rem 3rem',
-                                    background: 'var(--background)',
-                                    border: '1px solid var(--secondary)',
-                                    borderRadius: '12px',
-                                    color: 'var(--text-primary)',
-                                    outline: 'none'
-                                }}
-                            />
-                        </div>
-                    )}
 
                     <div style={{ position: 'relative' }}>
                         <User size={20} color="var(--text-secondary)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                         <input
                             type="text"
-                            placeholder="아이디"
+                            placeholder={"닉네임"}
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             style={{
@@ -127,8 +139,30 @@ const Login = ({ onLogin }) => {
                         />
                     </div>
 
+                    {!isLogin && (
+                        <div style={{ position: 'relative' }}>
+                            <CheckCircle size={20} color="var(--text-secondary)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
+                            <input
+                                type="password"
+                                placeholder="비밀번호 확인"
+                                value={passwordConfirm}
+                                onChange={(e) => setPasswordConfirm(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '1rem 1rem 1rem 3rem',
+                                    background: 'var(--background)',
+                                    border: '1px solid var(--secondary)',
+                                    borderRadius: '12px',
+                                    color: 'var(--text-primary)',
+                                    outline: 'none'
+                                }}
+                            />
+                        </div>
+                    )}
+
                     <button
                         type="submit"
+                        disabled={isLoading}
                         style={{
                             background: 'var(--accent)',
                             color: 'white',
@@ -141,18 +175,25 @@ const Login = ({ onLogin }) => {
                             alignItems: 'center',
                             gap: '0.5rem',
                             marginTop: '0.5rem',
-                            transition: 'opacity 0.2s'
+                            transition: 'opacity 0.2s',
+                            opacity: isLoading ? 0.7 : 1,
+                            cursor: isLoading ? 'not-allowed' : 'pointer'
                         }}
                     >
-                        {isLogin ? '로그인' : '회원가입'}
-                        <ArrowRight size={20} />
+                        {isLoading ? '처리 중...' : (isLogin ? '로그인' : '회원가입')}
+                        {!isLoading && <ArrowRight size={20} />}
                     </button>
                 </form>
 
                 <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                     {isLogin ? '계정이 없으신가요? ' : '이미 계정이 있으신가요? '}
                     <button
-                        onClick={() => setIsLogin(!isLogin)}
+                        onClick={() => {
+                            setIsLogin(!isLogin);
+                            setUsername('');
+                            setPassword('');
+                            setPasswordConfirm('');
+                        }}
                         style={{
                             background: 'transparent',
                             color: 'var(--accent)',

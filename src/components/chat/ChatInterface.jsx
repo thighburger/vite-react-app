@@ -1,17 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Send, Bot, User } from 'lucide-react';
-import { fetchChatResponse } from '../../services/api';
+import { fetchChatResponse, sendChatMessage, getChatHistory } from '../../services/api';
 
 const ChatInterface = ({ city, onBack, characterSettings }) => {
-    const [messages, setMessages] = useState([
-        {
-            id: 1,
-            sender: 'bot',
-            text: characterSettings?.personality
-                ? `(설정된 페르소나: ${characterSettings.personality})\n안녕하세요! ${characterSettings.name || `${city.name} 여행 메이트`}입니다. 무엇을 도와드릴까요?`
-                : `안녕하세요! ${city.name} 여행 메이트입니다. 무엇을 도와드릴까요?`
-        }
-    ]);
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
@@ -19,6 +11,50 @@ const ChatInterface = ({ city, onBack, characterSettings }) => {
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
+    useEffect(() => {
+        const loadHistory = async () => {
+            if (characterSettings?.chatBotId) {
+                try {
+                    const history = await getChatHistory(characterSettings.chatBotId);
+                    console.log("Chat history:", history);
+
+                    // Assuming history is an array of objects like { sender: 'user'|'bot', text: '...' }
+                    // Adjust mapping based on actual API response
+                    if (Array.isArray(history)) {
+                        const formattedMessages = history.map((msg, index) => ({
+                            id: msg.id || index, // Use ID from server or index
+                            sender: msg.sender || (msg.isUser ? 'user' : 'bot'), // Adjust based on API
+                            text: msg.text || msg.message
+                        }));
+                        setMessages(formattedMessages);
+                    } else {
+                        // If no history or not an array, set initial greeting
+                        setInitialGreeting();
+                    }
+                } catch (error) {
+                    console.error("Failed to load chat history:", error);
+                    setInitialGreeting();
+                }
+            } else {
+                setInitialGreeting();
+            }
+        };
+
+        const setInitialGreeting = () => {
+            setMessages([
+                {
+                    id: 1,
+                    sender: 'bot',
+                    text: characterSettings?.personality
+                        ? `(설정된 페르소나: ${characterSettings.personality})\n안녕하세요! ${characterSettings.name || `${city.name} 여행 메이트`}입니다. 무엇을 도와드릴까요?`
+                        : `안녕하세요! ${city.name} 여행 메이트입니다. 무엇을 도와드릴까요?`
+                }
+            ]);
+        };
+
+        loadHistory();
+    }, [characterSettings, city.name]);
 
     useEffect(() => {
         scrollToBottom();
@@ -34,7 +70,19 @@ const ChatInterface = ({ city, onBack, characterSettings }) => {
         setLoading(true);
 
         try {
-            const replyText = await fetchChatResponse(city.name, input);
+            let replyText;
+            if (characterSettings?.chatBotId) {
+                // Use the new chatbot API
+                const response = await sendChatMessage(characterSettings.chatBotId, input);
+                // Assuming response is the text string based on previous assumption, 
+                // or if it's an object, we extract the text. 
+                // The api.js function returns response.data, so let's handle it.
+                replyText = typeof response === 'string' ? response : (response.text || JSON.stringify(response));
+            } else {
+                // Fallback to old mock API
+                replyText = await fetchChatResponse(city.name, input);
+            }
+
             const botMsg = { id: Date.now() + 1, sender: 'bot', text: replyText };
             setMessages(prev => [...prev, botMsg]);
         } catch (error) {
@@ -101,9 +149,16 @@ const ChatInterface = ({ city, onBack, characterSettings }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                flexShrink: 0
+                                flexShrink: 0,
+                                overflow: 'hidden'
                             }}>
-                                {msg.sender === 'user' ? <User size={20} color="white" /> : <Bot size={20} color="white" />}
+                                {msg.sender === 'user' ? (
+                                    <User size={20} color="white" />
+                                ) : characterSettings?.image ? (
+                                    <img src={characterSettings.image} alt="Bot" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                    <Bot size={20} color="white" />
+                                )}
                             </div>
                             <div style={{
                                 background: msg.sender === 'user' ? 'var(--accent)' : 'var(--surface)',

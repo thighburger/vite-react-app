@@ -1,7 +1,0 @@
-fastapi
-uvicorn
-requests
-python-dotenv
-pydantic
-python-multipart
-deep-translator
