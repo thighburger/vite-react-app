@@ -33,28 +33,6 @@ const LoadingScreen = () => {
                 </h1>
             </motion.div>
 
-            <motion.div
-                animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.5, 1, 0.5]
-                }}
-                transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                }}
-                style={{
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '50%',
-                    border: '3px solid var(--accent)',
-                    borderTopColor: 'transparent'
-                }}
-            />
-
-            <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>
-                여행을 준비하고 있습니다...
-            </p>
         </div>
     );
 };

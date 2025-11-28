@@ -21,14 +21,16 @@ const Navigation = ({ provinceId, view }) => {
       top: '20px',
       left: '50%',
       transform: 'translateX(-50%)',
-      background: 'rgba(30, 41, 59, 0.9)',
-      backdropFilter: 'blur(10px)',
+      background: 'var(--surface)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
       padding: '0.5rem 1rem',
       borderRadius: '50px',
       display: 'flex',
       gap: '1rem',
       zIndex: 100,
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+      boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
     }}>
       <button
         onClick={() => navigate('/')}
@@ -63,6 +65,7 @@ const Navigation = ({ provinceId, view }) => {
           padding: '0.5rem 1rem',
           borderRadius: '25px',
           background: view === 'map' ? 'var(--accent)' : 'transparent',
+          backgroundImage: view === 'map' ? 'var(--gradient-primary)' : 'none',
           color: view === 'map' ? 'white' : 'var(--text-secondary)',
           fontWeight: 'bold',
           transition: 'all 0.2s',
@@ -81,6 +84,7 @@ const Navigation = ({ provinceId, view }) => {
           padding: '0.5rem 1rem',
           borderRadius: '25px',
           background: view === 'list' ? 'var(--accent)' : 'transparent',
+          backgroundImage: view === 'list' ? 'var(--gradient-primary)' : 'none',
           color: view === 'list' ? 'white' : 'var(--text-secondary)',
           fontWeight: 'bold',
           transition: 'all 0.2s',
@@ -100,11 +104,7 @@ const MapPage = () => {
   const selectedProvince = provinceId ? { id: provinceId, name: groupDisplayNames[provinceId] } : null;
 
   const handleCitySelect = (city) => {
-    if (city.id === 'suncheon') {
-      navigate(`/city/${city.id}`);
-    } else {
-      navigate(`/setup/${city.id}`);
-    }
+    navigate(`/city/${city.id}`);
   };
 
   return (
@@ -127,11 +127,7 @@ const ListPage = () => {
   if (!selectedProvince) return <Navigate to="/" />;
 
   const handleCitySelect = (city) => {
-    if (city.id === 'suncheon') {
-      navigate(`/city/${city.id}`);
-    } else {
-      navigate(`/setup/${city.id}`);
-    }
+    navigate(`/city/${city.id}`);
   };
 
   return (

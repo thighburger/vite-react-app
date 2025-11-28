@@ -87,6 +87,25 @@ export const signup = async (userData) => {
 };
 
 /**
+ * Logs in a user.
+ * 
+ * @param {Object} userData - User login data (username, password).
+ * @returns {Promise<Object>} - The response data.
+ */
+export const login = async (userData) => {
+    try {
+        const response = await axios.post('http://133.186.229.94:8080/auth/login', userData);
+        if (response.data && response.data.accessToken) {
+            localStorage.setItem('accessToken', response.data.accessToken);
+        }
+        return response.data;
+    } catch (error) {
+        console.error('Login failed:', error);
+        throw error;
+    }
+};
+
+/**
  * Creates a new chatbot.
  * 
  * @param {Object} botData - Chatbot data (name, personality, appearance).
@@ -95,6 +114,7 @@ export const signup = async (userData) => {
 export const createChatBot = async (botData) => {
     try {
         const response = await axios.post('http://133.186.229.94:8080/chatBots', botData);
+        console.log(botData);
         return response.data;
     } catch (error) {
         console.error('ChatBot creation failed:', error);
@@ -132,5 +152,56 @@ export const getChatHistory = async (chatBotId) => {
     } catch (error) {
         console.error('Failed to fetch chat history:', error);
         throw error;
+    }
+};
+
+/**
+ * Fetches the list of user's chatrooms.
+ * 
+ * @returns {Promise<Array>} - The list of chatrooms.
+ */
+export const getChatBots = async () => {
+    try {
+        const response = await axios.get('http://133.186.229.94:8080/chatBots');
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch chat bots:', error);
+        throw error;
+    }
+};
+
+/**
+ * Checks if a chatbot exists for the current user/city.
+ * 
+ * @param {string} cityId - The ID of the city.
+ * @returns {Promise<Object|null>} - The chatbot data if exists, otherwise null.
+ */
+export const checkChatBotExistence = async (cityId) => {
+    try {
+        const cityMapping = {
+            'suncheon': 1,
+            'yeosu': 2,
+            'damyang': 3,
+            'mokpo': 4
+        };
+
+        const targetId = cityMapping[cityId];
+        if (!targetId) return null;
+
+        const chatBots = await getChatBots();
+
+        // Find if there's a chatbot with the matching ID
+        // The user said: "if id:1 is in the array"
+        // Assuming the array contains objects with an 'id' field
+        const existingBot = chatBots.find(bot => bot.id === targetId);
+
+        if (existingBot) {
+            return { chatBotId: existingBot.id, ...existingBot };
+        }
+
+        return null;
+    } catch (error) {
+        console.error('Failed to check chatbot existence:', error);
+        return null;
     }
 };

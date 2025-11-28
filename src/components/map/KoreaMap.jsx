@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 import { geoCentroid } from 'd3-geo';
+import { useSpring } from 'framer-motion';
 import geoData from '../../assets/data/skorea-provinces-2018-geo.json';
 import { cityData, provinceFocus } from '../../data/cities';
 
@@ -11,6 +12,17 @@ const KoreaMap = ({ onSelectProvince, selectedProvince, onSelectCity }) => {
     const [hoveredRegion, setHoveredRegion] = useState(null);
     const [position, setPosition] = useState({ coordinates: [127.5, 35.8], zoom: 1 });
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    // Animation springs
+    const springConfig = { stiffness: 150, damping: 20, mass: 1 };
+    const zoomMotion = useSpring(1, springConfig);
+    const xMotion = useSpring(127.5, springConfig);
+    const yMotion = useSpring(35.8, springConfig);
+
+    const [animatedPosition, setAnimatedPosition] = useState({
+        coordinates: [127.5, 35.8],
+        zoom: 1
+    });
 
     useEffect(() => {
         const handleResize = () => setWindowWidth(window.innerWidth);
@@ -26,6 +38,32 @@ const KoreaMap = ({ onSelectProvince, selectedProvince, onSelectCity }) => {
             setPosition({ coordinates: [127.5, 35.8], zoom: 1 });
         }
     }, [selectedProvince]);
+
+    // Sync springs with target position
+    useEffect(() => {
+        zoomMotion.set(position.zoom);
+        xMotion.set(position.coordinates[0]);
+        yMotion.set(position.coordinates[1]);
+    }, [position, zoomMotion, xMotion, yMotion]);
+
+    // Update state on spring change to trigger re-render
+    useEffect(() => {
+        const unsubscribeZoom = zoomMotion.on("change", (latest) => {
+            setAnimatedPosition(prev => ({ ...prev, zoom: latest }));
+        });
+        const unsubscribeX = xMotion.on("change", (latest) => {
+            setAnimatedPosition(prev => ({ ...prev, coordinates: [latest, prev.coordinates[1]] }));
+        });
+        const unsubscribeY = yMotion.on("change", (latest) => {
+            setAnimatedPosition(prev => ({ ...prev, coordinates: [prev.coordinates[0], latest] }));
+        });
+
+        return () => {
+            unsubscribeZoom();
+            unsubscribeX();
+            unsubscribeY();
+        };
+    }, [zoomMotion, xMotion, yMotion]);
 
     const cities = selectedProvince ? (cityData[selectedProvince.id] || []) : [];
 
@@ -60,7 +98,7 @@ const KoreaMap = ({ onSelectProvince, selectedProvince, onSelectCity }) => {
                 marginBottom: '0.5rem',
                 fontSize: isMobile ? '1.5rem' : '2.5rem',
                 fontWeight: 'bold',
-                background: 'linear-gradient(to right, #60a5fa, #c084fc)',
+                background: 'var(--gradient-text)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textAlign: 'center',
@@ -83,8 +121,8 @@ const KoreaMap = ({ onSelectProvince, selectedProvince, onSelectCity }) => {
                     }}
                 >
                     <ZoomableGroup
-                        zoom={position.zoom}
-                        center={position.coordinates}
+                        zoom={animatedPosition.zoom}
+                        center={animatedPosition.coordinates}
                         disablePanning
                         disableZooming
                         filterZoomEvent={() => false}
@@ -195,10 +233,6 @@ const KoreaMap = ({ onSelectProvince, selectedProvince, onSelectCity }) => {
                     </ZoomableGroup>
                 </ComposableMap>
             </div>
-
-            <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', height: '20px', textAlign: 'center', fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                {tooltipContent || (!selectedProvince ? '지도를 클릭하여 여행지를 선택하세요' : '도시를 선택하여 여행을 시작하세요')}
-            </p>
         </div>
     );
 };

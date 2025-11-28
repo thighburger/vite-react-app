@@ -1,8 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Sparkles, MapPin } from 'lucide-react';
+import { ArrowLeft, Sparkles, MapPin, MessageCircle, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { checkChatBotExistence } from '../../services/api';
 
 const CityDetail = ({ city, onBack, onStartSetup }) => {
+    const navigate = useNavigate();
+    const [existingBotId, setExistingBotId] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const checkBot = async () => {
+            setIsLoading(true);
+            try {
+                const botData = await checkChatBotExistence(city.id);
+                if (botData && botData.chatBotId) {
+                    setExistingBotId(botData.chatBotId);
+                }
+            } catch (error) {
+                console.error("Error checking bot:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        checkBot();
+    }, [city.id]);
+
+    const handleContinue = () => {
+        navigate(`/chat/${city.id}`, { state: { settings: { chatBotId: existingBotId } } });
+    };
+
     return (
         <div className="container fade-in" style={{
             paddingTop: '2rem',
@@ -97,24 +124,44 @@ const CityDetail = ({ city, onBack, onStartSetup }) => {
                 <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={onStartSetup}
+                    onClick={isLoading ? null : (existingBotId ? handleContinue : onStartSetup)}
+                    disabled={isLoading}
                     style={{
-                        background: 'linear-gradient(to right, var(--accent), #c084fc)',
+                        background: existingBotId
+                            ? 'linear-gradient(to right, #34d399, #3b82f6)'
+                            : 'linear-gradient(to right, var(--accent), #c084fc)',
                         color: 'white',
                         padding: '1.5rem 3rem',
                         borderRadius: '50px',
                         fontSize: '1.5rem',
                         fontWeight: 'bold',
                         border: 'none',
-                        cursor: 'pointer',
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '1rem',
-                        boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.3)'
+                        boxShadow: existingBotId
+                            ? '0 10px 15px -3px rgba(52, 211, 153, 0.3)'
+                            : '0 10px 15px -3px rgba(59, 130, 246, 0.3)',
+                        opacity: isLoading ? 0.7 : 1
                     }}
                 >
-                    <Sparkles size={24} />
-                    여행 메이트 생성하기
+                    {isLoading ? (
+                        <>
+                            <Loader2 className="spin" size={24} />
+                            확인 중...
+                        </>
+                    ) : existingBotId ? (
+                        <>
+                            <MessageCircle size={24} />
+                            대화 이어하기
+                        </>
+                    ) : (
+                        <>
+                            <Sparkles size={24} />
+                            여행 메이트 생성하기
+                        </>
+                    )}
                 </motion.button>
             </div>
         </div>

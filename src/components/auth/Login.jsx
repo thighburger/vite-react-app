@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Lock, Smile, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
-import { signup } from '../../services/api';
+import { signup, login } from '../../services/api';
 
 const Login = ({ onLogin }) => {
     const [isLogin, setIsLogin] = useState(true);
@@ -14,9 +14,20 @@ const Login = ({ onLogin }) => {
         e.preventDefault();
 
         if (isLogin) {
-            // Login logic (mock for now as requested only signup changes)
+            // Login logic
             if (username && password) {
-                onLogin({ username, name: username });
+                setIsLoading(true);
+                try {
+                    const userData = { username, password };
+                    const response = await login(userData);
+                    console.log('Login success:', response);
+                    onLogin({ username, name: username });
+                } catch (error) {
+                    console.error('Login error:', error);
+                    alert('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
+                } finally {
+                    setIsLoading(false);
+                }
             } else {
                 alert('아이디와 비밀번호를 입력해주세요.');
             }
