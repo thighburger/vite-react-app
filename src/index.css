@@ -152,6 +152,13 @@ button {
   .province-grid {
     grid-template-columns: 1fr !important;
   }
+
+  /* Prevent zoom on inputs */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
 
 /* Glassmorphism Utilities */
@@ -167,4 +174,77 @@ button {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Chat Input Styles */
+.chat-input-area {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  background: linear-gradient(to top, var(--background) 0%, transparent 100%);
+  z-index: 20;
+}
+
+.chat-form {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  gap: 0.5rem;
+  background: var(--surface);
+  padding: 0.5rem;
+  border-radius: 50px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+}
+
+.chat-input {
+  flex: 1;
+  padding: 0.8rem 1.5rem;
+  border-radius: 30px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 1rem;
+  outline: none;
+  min-width: 0;
+}
+
+.chat-send-button {
+  background: var(--gradient-primary);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  border: none;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .chat-input-area {
+    padding: 1rem 0.5rem;
+  }
+
+  .chat-form {
+    padding: 0.3rem;
+    gap: 0.3rem;
+  }
+
+  .chat-input {
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .chat-send-button {
+    width: 40px;
+    height: 40px;
+  }
 }

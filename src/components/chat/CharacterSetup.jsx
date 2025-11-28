@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Settings, Sparkles, User, MessageSquare, ArrowLeft, Loader2 } from 'lucide-react';
-import { generateCharacterImage, createChatBot } from '../../services/api';
+import { generateCharacterImage, createChatBot, deleteChatBot } from '../../services/api';
 
 const CharacterSetup = ({ city, onStartChat, onBack }) => {
     const [name, setName] = useState('');
@@ -26,9 +26,9 @@ const CharacterSetup = ({ city, onStartChat, onBack }) => {
             setIsGenerated(true);
 
             // Save to localStorage
-            localStorage.setItem('character_image', imageUrl);
+            localStorage.setItem(`mate_image_${city.name}`, imageUrl);
             // Assuming botResponse has an id field. If not, we might need to adjust.
-            localStorage.setItem('character_info', JSON.stringify({
+            localStorage.setItem(`mate_info_${city.name}`, JSON.stringify({
                 name,
                 personality,
                 appearance,
@@ -44,7 +44,7 @@ const CharacterSetup = ({ city, onStartChat, onBack }) => {
 
     const handleStartChatting = () => {
         // Retrieve bot info from local storage if available, or use state if just created
-        const storedInfo = localStorage.getItem('character_info');
+        const storedInfo = localStorage.getItem(`mate_info_${city.name}`);
         const botId = storedInfo ? JSON.parse(storedInfo).chatBotId : null;
 
         onStartChat({
@@ -118,30 +118,77 @@ const CharacterSetup = ({ city, onStartChat, onBack }) => {
                     />
                 </motion.div>
 
-                <button
-                    onClick={handleStartChatting}
-                    style={{
-                        background: 'linear-gradient(to right, var(--accent), #c084fc)',
-                        color: 'white',
-                        padding: '1.2rem 3rem',
-                        borderRadius: '50px',
-                        fontSize: '1.3rem',
-                        fontWeight: 'bold',
-                        boxShadow: '0 10px 20px rgba(59, 130, 246, 0.4)',
-                        border: 'none',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.8rem',
-                        transition: 'transform 0.2s'
-                    }}
-                    onMouseDown={(e) => e.target.style.transform = 'scale(0.95)'}
-                    onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
-                >
-                    <MessageSquare size={24} />
-                    메이트와 채팅하기
-                </button>
-            </div>
+
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', alignItems: 'center' }}>
+                    <button
+                        onClick={handleStartChatting}
+                        style={{
+                            background: 'linear-gradient(to right, var(--accent), #c084fc)',
+                            color: 'white',
+                            padding: '1.2rem 3rem',
+                            borderRadius: '50px',
+                            fontSize: '1.3rem',
+                            fontWeight: 'bold',
+                            boxShadow: '0 10px 20px rgba(59, 130, 246, 0.4)',
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.8rem',
+                            transition: 'transform 0.2s',
+                            width: 'fit-content'
+                        }}
+                        onMouseDown={(e) => e.target.style.transform = 'scale(0.95)'}
+                        onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
+                    >
+                        <MessageSquare size={24} />
+                        메이트와 채팅하기
+                    </button>
+
+                    <button
+                        onClick={async () => {
+                            if (window.confirm('정말로 메이트를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.')) {
+                                try {
+                                    const storedInfo = localStorage.getItem(`mate_info_${city.name}`);
+                                    if (storedInfo) {
+                                        const { chatBotId } = JSON.parse(storedInfo);
+                                        if (chatBotId) {
+                                            await deleteChatBot(chatBotId);
+                                        }
+                                    }
+                                    localStorage.removeItem(`mate_image_${city.name}`);
+                                    localStorage.removeItem(`mate_info_${city.name}`);
+                                    setIsGenerated(false);
+                                    setGeneratedImage(null);
+                                    setName('');
+                                    setPersonality('');
+                                    setAppearance('');
+                                    alert('메이트가 삭제되었습니다.');
+                                } catch (error) {
+                                    console.error('Failed to delete mate:', error);
+                                    alert('메이트 삭제에 실패했습니다.');
+                                }
+                            }
+                        }}
+                        style={{
+                            background: 'transparent',
+                            color: '#ef4444',
+                            padding: '0.8rem',
+                            borderRadius: '8px',
+                            fontSize: '0.9rem',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        메이트 삭제하기
+                    </button>
+                </div>
+            </div >
         );
     }
 

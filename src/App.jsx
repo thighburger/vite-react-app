@@ -213,8 +213,9 @@ const ChatPage = () => {
 
   // Try to recover settings from localStorage if not in state
   const settings = state?.settings || (() => {
-    const storedInfo = localStorage.getItem('character_info');
-    const storedImage = localStorage.getItem('character_image');
+    if (!city) return null;
+    const storedInfo = localStorage.getItem(`mate_info_${city.name}`);
+    const storedImage = localStorage.getItem(`mate_image_${city.name}`);
     if (storedInfo) {
       return { ...JSON.parse(storedInfo), image: storedImage };
     }
@@ -239,6 +240,7 @@ import Login from './components/auth/Login';
 import { Sun, Moon } from 'lucide-react';
 
 function App() {
+  const location = useLocation();
   const [isLoading, setIsLoading] = React.useState(true);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [theme, setTheme] = React.useState('dark');
@@ -274,7 +276,7 @@ function App() {
     return <LoadingScreen />;
   }
 
-  const location = useLocation();
+
 
   return (
     <>

@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+import logo from '../../assets/logo.png';
+
 const LoadingScreen = () => {
     return (
         <div style={{
@@ -22,15 +24,7 @@ const LoadingScreen = () => {
                 transition={{ duration: 0.5 }}
                 style={{ marginBottom: '2rem' }}
             >
-                <h1 style={{
-                    fontSize: '3rem',
-                    fontWeight: 'bold',
-                    background: 'linear-gradient(to right, #60a5fa, #c084fc)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                }}>
-                    Travel Mate
-                </h1>
+                <img src={logo} alt="Travel Mate" style={{ height: '120px' }} />
             </motion.div>
 
         </div>

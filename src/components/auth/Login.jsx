@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { User, Lock, Smile, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
 import { signup, login } from '../../services/api';
 
+import logo from '../../assets/logo.png';
+
 const Login = ({ onLogin }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [username, setUsername] = useState('');
@@ -95,16 +97,7 @@ const Login = ({ onLogin }) => {
                 )}
 
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                    <h1 style={{
-                        fontSize: '2rem',
-                        fontWeight: 'bold',
-                        marginBottom: '0.5rem',
-                        background: 'linear-gradient(to right, #60a5fa, #c084fc)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                    }}>
-                        Travel Mate
-                    </h1>
+                    <img src={logo} alt="Travel Mate" style={{ height: '80px', marginBottom: '1rem' }} />
                     <p style={{ color: 'var(--text-secondary)' }}>
                         {isLogin ? '다시 오신 것을 환영합니다!' : '새로운 여행을 시작해보세요'}
                     </p>
